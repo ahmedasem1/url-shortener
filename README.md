@@ -10,34 +10,21 @@ This is a distributed URL shortener service built using **GoLang, Redis, MongoDB
 - **Analytics Logging**: Track visits and log analytics asynchronously.
 - **Distributed Deployment**: Scalable with Kubernetes.
 
----
-
-## Tech Stack
-- **Backend**: Go (Gin framework)
-- **Storage**: Redis (caching) + MongoDB (persistent storage)
-- **Queue Processing**: Worker-based logging system
-- **Deployment**: Kubernetes + Docker
-
----
 
 ## Installation & Setup
 
 ### **Prerequisites**
 Ensure you have the following installed:
-- **Go** (1.18+)
 - **Docker & Docker Compose**
-- **Kubernetes (Minikube or K3s for local testing)**
-- **Redis**
-- **MongoDB**
 
 ### **Clone the Repository**
 ```sh
-git clone https://github.com/your-username/url-shortener.git
+git clone https://github.com/ahmedasem1/url-shortener.git
 cd url-shortener
 ```
 
 ### **Environment Variables**
-Create a `.env` file with the following variables:
+The service automatically sets default values if environment variables are not provided.However, you can create a `.env` file (optional) with custom values:
 ```ini
 REDIS_ADDR=127.0.0.1:6379
 MONGO_URI=mongodb://localhost:27017
@@ -58,6 +45,16 @@ docker compose up  test
 ---
 
 ## API Endpoints
+
+### **Swagger API Documentation**
+
+After running the service, visit:
+
+```
+http://localhost:8080/swagger/index.html
+```
+
+to explore the available API endpoints.
 
 ### **1. Shorten URL**
 **Endpoint:** `POST /shorten`
@@ -112,4 +109,4 @@ minikube service list
 Or, for a specific service:
 ```sh
 minikube service api --url
-```# url-shortener
+```
