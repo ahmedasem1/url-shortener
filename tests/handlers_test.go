@@ -30,7 +30,7 @@ func setupRedis() {
 func setupRateLimitTestRouter() *gin.Engine {
 	setupRedis()
 	r := gin.Default()
-	r.Use(middleware.RateLimit(storage.RedisClient))
+	r.Use(middleware.RateLimit(storage.RedisClient, 10)) // Fixed argument count
 	r.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "ok"})
 	})
