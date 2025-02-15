@@ -44,6 +44,25 @@ docker compose up  test
 
 ---
 
+
+## CI/CD Pipeline
+This project includes a **GitHub Actions** CI/CD pipeline that automates deployment.
+
+### **Build & Test**
+- Runs on every push to `main` or `develop` branches and on pull requests.
+- Sets up Go, installs dependencies, and runs tests.
+- Starts MongoDB and Redis containers for integration testing.
+
+### **Build & Push Docker Image**
+- Runs only on pushes to `main`.
+- Builds and pushes the Docker image to **Docker Hub**.
+
+### **Deploy to Kubernetes**
+- Runs only on pushes to `main`.
+- Deploys the application using `kubectl apply`.
+
+---
+
 ## API Endpoints
 
 ### **Swagger API Documentation**
