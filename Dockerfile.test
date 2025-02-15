@@ -1,0 +1,13 @@
+# Use Go 1.22 instead of 1.21
+FROM golang:1.22 AS test
+
+WORKDIR /app
+
+# Copy go.mod and go.sum, then download dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the application source code
+COPY . .
+
+CMD ["go", "test", "-v", "./..."]

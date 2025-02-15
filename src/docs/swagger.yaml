@@ -1,0 +1,63 @@
+definitions:
+  handlers.ShortenRequest:
+    properties:
+      url:
+        type: string
+    required:
+    - url
+    type: object
+info:
+  contact: {}
+paths:
+  /{shortID}:
+    get:
+      description: Redirects a short URL to its original long URL.
+      parameters:
+      - description: Short URL identifier
+        in: path
+        name: shortID
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Redirects to original URL
+        "404":
+          description: Short ID not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Redirect to original URL
+      tags:
+      - URL
+  /shorten:
+    post:
+      consumes:
+      - application/json
+      description: Generates a short URL for a given long URL.
+      parameters:
+      - description: URL to shorten
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ShortenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Shortened URL
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Shorten a URL
+      tags:
+      - URL
+swagger: "2.0"
