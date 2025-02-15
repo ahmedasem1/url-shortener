@@ -1,42 +1,33 @@
 package middleware
 
 import (
-	"log"
-	"net/http"
 	"time"
-
-	"context"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
 
-func RateLimit(redisClient *redis.Client) gin.HandlerFunc {
+// RateLimit applies rate limiting using Redis
+func RateLimit(rdb *redis.Client, limit int) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if redisClient == nil {
-			log.Println("Rate limiter disabled: Redis is unavailable")
-			c.Next()
-			return
-		}
-
-		ctx := context.Background()
 		ip := c.ClientIP()
 		key := "rate_limit:" + ip
 
-		count, err := redisClient.Incr(ctx, key).Result()
+		// Increment request count
+		count, err := rdb.Incr(c, key).Result()
 		if err != nil {
-			log.Println("Redis error in rate limiter:", err)
-			c.Next()
+			c.AbortWithStatusJSON(500, gin.H{"error": "Rate limit error"})
 			return
 		}
 
+		// Set expiration on first request
 		if count == 1 {
-			redisClient.Expire(ctx, key, 60*time.Second)
+			rdb.Expire(c, key, time.Minute)
 		}
 
-		if count > 10 {
-			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Rate limit exceeded"})
-			c.Abort()
+		// Check if rate limit exceeded
+		if count > int64(limit) {
+			c.AbortWithStatusJSON(429, gin.H{"error": "Rate limit exceeded"})
 			return
 		}
 

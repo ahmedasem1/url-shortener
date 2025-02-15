@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"url-shortener/src/config"
 	"url-shortener/src/handlers"
 	"url-shortener/src/middleware"
 	"url-shortener/src/storage"
@@ -10,17 +11,19 @@ import (
 	_ "url-shortener/src/docs"
 
 	"github.com/gin-gonic/gin"
-
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
+	// Load configuration
+	cfg := config.LoadConfig()
+
 	// Initialize Redis
-	storage.InitRedis("redis:6379")
+	storage.InitRedis(cfg.RedisAddr)
 
 	// Initialize MongoDB
-	mongoClient, err := storage.InitMongoDB("mongodb://mongo:27017")
+	mongoClient, err := storage.InitMongoDB(cfg.MongoURI)
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
@@ -33,7 +36,7 @@ func main() {
 
 	// Set up Gin router
 	r := gin.Default()
-	r.Use(middleware.RateLimit(storage.RedisClient))
+	r.Use(middleware.RateLimit(storage.RedisClient, cfg.RateLimit))
 
 	r.POST("/shorten", func(c *gin.Context) {
 		handlers.ShortenURL(c, storage.RedisClient)
@@ -45,6 +48,6 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	log.Println("Server started on port 8080")
-	r.Run(":8080")
+	log.Printf("Server started on port %s", cfg.ServerPort)
+	r.Run(":" + cfg.ServerPort)
 }
