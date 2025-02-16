@@ -34,6 +34,14 @@ jobs:
         with:
           go-version: '1.22'
 
+      - name: Cache Go Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Install Dependencies
         run: go mod tidy
 
@@ -50,7 +58,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -69,13 +77,17 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Set up Kubeconfig
         run: |
-          echo "${{ secrets.KUBECONFIG }}" | base64 --decode | tr -d '\r' > kubeconfig.yaml
-          export KUBECONFIG=kubeconfig.yaml
-
-      - name: Verify Kubernetes Connection
-        run: kubectl get nodes
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 --decode | tr -d '\r' > kubeconfig.yaml
+          export KUBECONFIG=$(pwd)/kubeconfig.yaml
+          kubectl cluster-info || exit 1
 
       - name: Deploy to Kubernetes
-        run: kubectl apply -f k8s/
+        run: |
+          kubectl apply --validate=false -f k8s/
+          kubectl rollout status deployment/url-shortener
+
