@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: url-shortener-api:latest
+        image: ahmedasem1/url-shortener:latest
         ports:
         - containerPort: 8080
         env:
